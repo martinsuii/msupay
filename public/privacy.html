@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — NespPay</title>
+  <link rel="stylesheet" href="legal.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Nesp<span class="brand-accent">Pay</span></span>
+      </a>
+      <div class="topbar-actions">
+        <a class="topbar-link" href="/">Home</a>
+        <a class="topbar-link" href="/terms">Terms</a>
+        <button id="themeBtn" class="theme-btn" aria-label="Toggle dark mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last Updated: August 28, 2026</p>
+
+    <h2>1. Overview &amp; Core Philosophy</h2>
+    <p>NespPay respects your privacy and operates on a principle of minimal data collection. Because NespPay is non-custodial, we do not collect financial accounts, bank details, or Identity Verification (KYC) documents.</p>
+
+    <h2>2. Data We Collect and Why</h2>
+    <table>
+      <thead>
+        <tr><th>Data Collected</th><th>Purpose</th><th>Legal Basis (GDPR Art. 6)</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Business Account Email</td>
+          <td>Account creation, authentication, password resets, and optional transactional notifications (e.g., payment alerts).</td>
+          <td>Contractual Necessity &amp; Legitimate Interest</td>
+        </tr>
+        <tr>
+          <td>Hashed Password</td>
+          <td>Secure account authentication. Stored exclusively using memory-hard cryptographic hashing.</td>
+          <td>Contractual Necessity</td>
+        </tr>
+        <tr>
+          <td>Payer Email (Optional)</td>
+          <td>One-time entry during customer checkout for bot-prevention, session mapping, and issuing a digital payment receipt.</td>
+          <td>Legitimate Interest (Security/Anti-Abuse)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Email &amp; Data Handling Principles</h2>
+    <ul>
+      <li><strong>No Marketing:</strong> We will never send marketing, promotional emails, or share your email address with third-party advertisers.</li>
+      <li><strong>Receipts Only:</strong> Payer emails are strictly used to process the single transaction and generate a payment receipt.</li>
+    </ul>
+
+    <h2>4. Data Retention &amp; Automatic Purging</h2>
+    <ul>
+      <li><strong>6-Month Inactivity Purge:</strong> Customer transaction emails and inactive session records are automatically and permanently deleted from our live databases after 6 months of inactivity.</li>
+      <li><strong>Account Deletion (Right to Erasure):</strong> When a business clicks the "Delete Account" button in the dashboard, all associated personal data—including the registered email, hashed password, and session tokens—is immediately and permanently scrubbed from our active databases.</li>
+    </ul>
+
+    <h2>5. On-Chain Data Disclaimer</h2>
+    <p>Please note that transactions conducted on public blockchains are inherently public, immutable, and permanent. NespPay has no ability to modify, censor, or erase data written to a public blockchain.</p>
+
+    <h2>6. Contact</h2>
+    <p>For any privacy-related inquiries or questions regarding account data, please manage your settings directly through your NespPay account dashboard or contact the administrator.</p>
+  </main>
+
+  <script src="theme.js"></script>
+</body>
+</html>

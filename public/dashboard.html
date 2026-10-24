@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — NespPay</title>
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Nesp<span class="brand-accent">Pay</span></span>
+      </a>
+      <div class="topbar-actions">
+        <a class="topbar-link" href="/">Home</a>
+        <button id="themeBtn" class="theme-btn" aria-label="Toggle dark mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+          </svg>
+        </button>
+        <span class="topbar-email" id="topEmail">—</span>
+        <button id="logoutBtn" class="logout-btn">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="dash">
+    <aside class="sidebar">
+      <nav class="side-nav">
+        <a href="#overview" class="side-link active" data-target="overview">Overview</a>
+        <a href="#wallet" class="side-link" data-target="wallet">Wallet</a>
+        <a href="#transactions" class="side-link" data-target="transactions">Transactions</a>
+        <a href="#webhooks" class="side-link" data-target="webhooks">Webhooks</a>
+        <a href="#company" class="side-link" data-target="company">Company</a>
+      </nav>
+
+    </aside>
+
+    <main class="content">
+      <h1 class="dash-title">Dashboard</h1>
+      <p class="dash-sub">Welcome back, <span id="companyNameTitle">merchant</span>.</p>
+
+      <section id="overview" class="stats">
+        <div class="stat-card">
+          <span class="stat-label">Earnings</span>
+          <span class="stat-value" id="earnings">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Company code</span>
+          <div class="stat-code-row">
+            <span class="stat-value code" id="companyCode">—</span>
+            <button id="copyBtn" class="mini-copy">Copy</button>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Wallet address</span>
+          <span class="stat-value small" id="walletAddress">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Transactions</span>
+          <span class="stat-value" id="txCount">0</span>
+        </div>
+      </section>
+
+      <section id="wallet" class="panel">
+        <h2>Wallet</h2>
+        <p class="panel-sub">Settled payments are held in your wallet. Withdraw ETH to any address.</p>
+        <div class="wallet-row">
+          <code id="walletAddressBig">—</code>
+          <button id="copyWalletBtn" class="copy-btn">Copy</button>
+        </div>
+
+        <div class="section-label">Bitcoin</div>
+        <div class="wallet-row">
+          <code id="btcAddress">—</code>
+          <button class="copy-btn" data-copy="btcAddress">Copy</button>
+        </div>
+        <div class="section-label">Litecoin</div>
+        <div class="wallet-row">
+          <code id="ltcAddress">—</code>
+          <button class="copy-btn" data-copy="ltcAddress">Copy</button>
+        </div>
+
+        <div class="section-label">Access</div>
+        <button id="exportBtn" class="btn btn-ghost">Export wallet credentials</button>
+
+        <div class="withdraw-row">
+          <input id="withdrawAddress" type="text" placeholder="Destination address (0x…)" />
+          <button id="withdrawBtn" class="btn">Withdraw all</button>
+        </div>
+        <p id="withdrawMsg" class="saved"></p>
+      </section>
+
+      <section id="transactions" class="panel">
+        <h2>Transactions</h2>
+        <p class="panel-sub">Every payment for your company.</p>
+        <div id="txList" class="tx-list"><p class="tx-empty">No transactions yet.</p></div>
+      </section>
+
+      <section id="webhooks" class="panel">
+        <h2>Webhooks</h2>
+        <p class="panel-sub">Receive instant cryptographic HTTP callbacks whenever payments are detected, confirmed, or completed.</p>
+        
+        <div class="field">
+          <label for="webhookUrl">Webhook Endpoint URL</label>
+          <div class="input-action-row">
+            <input id="webhookUrl" type="url" placeholder="https://api.yourdomain.com/webhooks/nesppay" />
+            <button id="saveWebhookBtn" class="btn">Save URL</button>
+          </div>
+          <p class="field-hint" id="webhookSaveMsg" style="display:none; color:#10b981; margin-top:6px; font-size:0.85rem;">Saved successfully ✓</p>
+        </div>
+
+        <div class="meta-row">
+          <span class="k">Signing secret</span>
+          <div class="secret-row">
+            <code id="webhookSecret" class="secret-code">—</code>
+            <button id="copyWebhookSecretBtn" class="mini-copy">Copy</button>
+            <button id="regenWebhookSecretBtn" class="mini-copy" style="background:transparent; border:1px solid var(--border);">Regenerate</button>
+          </div>
+        </div>
+        <p class="field-hint">NespPay signs all payloads with HMAC-SHA256 in the <code>X-NespPay-Signature</code> header.</p>
+
+        <div class="webhook-actions-row">
+          <button id="testWebhookBtn" class="btn btn-ghost">Send test ping</button>
+          <span id="webhookTestStatus" class="test-status"></span>
+        </div>
+
+        <div class="section-label" style="margin-top: 2rem;">Recent deliveries</div>
+        <div id="webhookDeliveryList" class="delivery-list">
+          <p class="tx-empty">No webhook deliveries yet.</p>
+        </div>
+      </section>
+
+
+      <section id="company" class="panel">
+        <h2>Company</h2>
+        <p class="panel-sub">Your company code never changes, even when you edit this info.</p>
+        <div class="meta-row"><span class="k">Email</span><span class="v" id="email">—</span></div>
+        <div class="field">
+          <label for="companyName">Company name</label>
+          <input id="companyName" type="text" placeholder="Nesp Café" />
+        </div>
+        <div class="field">
+          <label for="companyDescription">Description</label>
+          <textarea id="companyDescription" placeholder="A short description (optional)"></textarea>
+        </div>
+        <button id="saveBtn" class="btn">Save changes</button>
+        <p class="saved" id="saved">Saved ✓</p>
+      </section>
+
+      <section id="danger" class="panel danger">
+        <h2>Danger zone</h2>
+        <p class="panel-sub">Permanently delete your account and all associated data.</p>
+        <button id="deleteBtn" class="btn btn-danger-solid">Delete account</button>
+        <div id="deleteConfirm" class="delete-confirm hidden">
+          <p class="delete-warning">Warning: Deleting your account will remove your saved dashboard configuration, single-use address mapping, and API access. Ensure you have backed up your wallet's private key / seed phrase, or you will lose access to your on-chain funds.</p>
+          <div class="delete-actions">
+            <button id="deleteCancel" class="btn btn-ghost">Cancel</button>
+            <button id="deleteConfirmBtn" class="btn btn-danger-solid">Yes, delete my account</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <p><a href="/terms">Terms of Service</a> · <a href="/privacy">Privacy Policy</a></p>
+  </footer>
+
+  <div id="exportModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h2>Export wallet credentials</h2>
+      <p class="export-warning">Keep these private keys secret. Anyone with them can spend your funds. Import them into a wallet app to access your money without this dashboard.</p>
+
+      <div class="cred-block">
+        <div class="cred-head"><span class="cred-coin">ETH</span><span class="cred-addr" id="expEthAddr">—</span></div>
+        <div class="cred-key-row"><code id="expEthKey">—</code><button class="copy-btn" data-copy="expEthKey">Copy</button></div>
+      </div>
+
+      <div class="cred-block">
+        <div class="cred-head"><span class="cred-coin">BTC</span><span class="cred-addr" id="expBtcAddr">—</span></div>
+        <div class="cred-key-row"><code id="expBtcKey">—</code><button class="copy-btn" data-copy="expBtcKey">Copy</button></div>
+      </div>
+
+      <div class="cred-block">
+        <div class="cred-head"><span class="cred-coin">LTC</span><span class="cred-addr" id="expLtcAddr">—</span></div>
+        <div class="cred-key-row"><code id="expLtcKey">—</code><button class="copy-btn" data-copy="expLtcKey">Copy</button></div>
+      </div>
+
+      <button id="exportClose" class="btn">Done</button>
+    </div>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

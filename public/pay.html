@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NespPay</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="pay-sheet">
+      <header class="brand">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Nesp<span class="brand-accent">Pay</span></span>
+        <button id="themeBtn" class="theme-btn" aria-label="Toggle dark mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+          </svg>
+        </button>
+      </header>
+
+      <div id="paramError" class="param-error hidden">
+        <div class="param-error-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <h2 class="param-error-title">Something went wrong</h2>
+        <p class="param-error-msg" id="paramErrorMsg">This payment link is invalid.</p>
+        <p class="param-error-hint">Please contact the owner of this payment link.</p>
+        <a class="param-error-back" href="/">Back to NespPay</a>
+      </div>
+
+      <div id="payForm" class="pay-form">
+        <h1 class="title" id="title">Pay with NespPay</h1>
+        <p class="subtitle" id="subtitle">Ethereum mainnet · ETH</p>
+        <div id="customerLine" class="customer-line hidden"></div>
+
+        <div class="coin-select" id="coinSelect">
+          <button class="coin-opt active" data-coin="ETH">ETH</button>
+          <button class="coin-opt" data-coin="BTC">BTC</button>
+          <button class="coin-opt" data-coin="LTC">LTC</button>
+        </div>
+
+        <div class="amount-wrap">
+          <span class="amount-symbol" id="amountSymbol">Ξ</span>
+          <span id="amount" class="amount-value">0.00</span>
+        </div>
+        <p class="amount-eur" id="amountEur"></p>
+
+        <div class="wallet-row" id="walletRow">
+          <button id="connectBtn" class="wallet-btn">Connect Wallet</button>
+          <span id="walletAddress" class="wallet-address hidden"></span>
+        </div>
+        <p id="walletError" class="wallet-error hidden"></p>
+
+        <button id="createBtn" class="pay-btn">
+          <span class="ripple"></span>
+          <span class="pay-btn-label">Pay</span>
+        </button>
+
+        <button id="walletPayBtn" class="wallet-pay-btn hidden">Pay with wallet</button>
+      </div>
+
+      <div id="invoice" class="invoice hidden">
+        <div class="status-icon" id="statusIcon">
+          <svg class="spinner" viewBox="0 0 50 50">
+            <circle class="spinner-track" cx="25" cy="25" r="20"></circle>
+            <circle class="spinner-ring" cx="25" cy="25" r="20"></circle>
+          </svg>
+          <svg class="check" viewBox="0 0 52 52">
+            <circle class="check-circle" cx="26" cy="26" r="24"></circle>
+            <path class="check-mark" fill="none" d="M14 27l8 8 16-16"></path>
+          </svg>
+          <svg class="clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 7v5l3 2"></path>
+          </svg>
+          <svg class="refund" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 14 4 9l5-5"></path>
+            <path d="M4 9h10a6 6 0 0 1 6 6"></path>
+          </svg>
+        </div>
+
+        <div id="status" class="status">Waiting for payment…</div>
+
+        <div id="addressRow" class="address-row">
+          <code id="address">0x0000…</code>
+          <button id="copyBtn" class="copy-btn">Copy</button>
+        </div>
+
+        <div id="qrWrap" class="qr-wrap hidden">
+          <div class="qr-card">
+            <img id="qrImg" alt="Payment QR code" />
+          </div>
+          <p class="qr-hint">Scan with your wallet to pay</p>
+        </div>
+
+        <div id="actions" class="actions hidden">
+          <button id="cancelBtn" class="btn cancel-btn">Cancel</button>
+          <button id="payBtn" class="btn confirm-btn">Pay</button>
+          <p class="disclaimer">A small network fee may be deducted from the amount.</p>
+        </div>
+
+        <a id="explorer" class="explorer hidden" href="#" target="_blank" rel="noopener">View transaction →</a>
+        <a id="receiptBtn" class="receipt-btn hidden" href="#" download>Download receipt</a>
+      </div>
+    </section>
+  </main>
+
+  <div id="errorOverlay" class="error-overlay hidden">
+    <div class="error-card">
+      <div class="error-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="1" y1="1" x2="23" y2="23"></line>
+          <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+          <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+          <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+          <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+          <line x1="12" y1="20" x2="12.01" y2="20"></line>
+        </svg>
+      </div>
+      <h2 class="error-title">Connection error</h2>
+      <p class="error-sub">Please try again later</p>
+      <button id="retryBtn" class="retry-btn">Retry</button>
+    </div>
+  </div>
+
+  <a id="reportBtn" class="report-btn" href="mailto:nesppay@nesppay.example?subject=NespPay%20issue" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+      <line x1="4" y1="22" x2="4" y2="15"></line>
+    </svg>
+    Report issue
+  </a>
+
+  <footer class="pay-footer">
+    <a href="/terms">Terms of Service</a> · <a href="/privacy">Privacy Policy</a>
+  </footer>
+
+  <script src="theme.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pay link tester — NespPay</title>
+  <link rel="stylesheet" href="paytester.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Nesp<span class="brand-accent">Pay</span></span>
+      </a>
+      <div class="topbar-actions">
+        <a class="topbar-link" href="/">Home</a>
+        <a class="topbar-link" href="/docs">Docs</a>
+        <button id="themeBtn" class="theme-btn" aria-label="Toggle dark mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <section class="form-panel">
+      <h1 class="title">Pay link tester</h1>
+      <p class="sub">Fill in the fields — the finished <span class="mono">/pay</span> URL is generated automatically.</p>
+
+      <div class="field">
+        <label for="companyCode">Company code</label>
+        <input id="companyCode" type="text" placeholder="NESPCFE" value="NESPCFE" />
+      </div>
+      <div class="field">
+        <label for="product">Product</label>
+        <input id="product" type="text" placeholder="Black Coffee" value="Black Coffee" />
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="customerName">Customer name</label>
+          <input id="customerName" type="text" placeholder="Jane" value="Jane" />
+        </div>
+        <div class="field">
+          <label for="customerInfo">Customer info</label>
+          <input id="customerInfo" type="text" placeholder="Order #1234" value="Order #1234" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="price">Price (EUR)</label>
+        <input id="price" type="text" placeholder="2.50" value="2.50" />
+      </div>
+      <div class="field">
+        <label for="returns">Return URL on success (optional)</label>
+        <input id="returns" type="text" placeholder="https://…" />
+      </div>
+      <div class="field">
+        <label for="returnf">Return URL on cancel (optional)</label>
+        <input id="returnf" type="text" placeholder="https://…" />
+      </div>
+    </section>
+
+    <aside class="result-panel">
+      <h2 class="result-title">Generated URL</h2>
+      <div class="url-box">
+        <code id="url">…</code>
+      </div>
+      <p id="hint" class="hint"></p>
+      <div class="actions">
+        <button id="copyBtn" class="btn btn-primary">Copy</button>
+        <a id="openBtn" class="btn btn-ghost" href="#" target="_blank" rel="noopener">Open</a>
+      </div>
+      <p class="note">Open it to see the payment page a customer would get.</p>
+    </aside>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="paytester.js"></script>
+</body>
+</html>

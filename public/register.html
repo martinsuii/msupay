@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — NespPay</title>
+  <link rel="stylesheet" href="account.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Nesp<span class="brand-accent">Pay</span></span>
+      </a>
+      <div class="nav-actions">
+        <a class="nav-link" href="/login">Sign in</a>
+        <button id="themeBtn" class="theme-btn" aria-label="Toggle dark mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="steps-bar">
+        <span id="bar1" class="on"></span>
+        <span id="bar2"></span>
+      </div>
+
+      <div id="step1" class="step active">
+        <h1 class="title">Create your account</h1>
+        <p class="sub">Register to get your merchant company code.</p>
+        <div class="error" id="error1"></div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@example.com" />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="••••••••" />
+        </div>
+        <div class="field">
+          <label for="password2">Password again</label>
+          <input id="password2" type="password" placeholder="••••••••" />
+        </div>
+        <button id="nextBtn" class="btn">Continue</button>
+        <p class="hint">Already registered? <a href="/login">Sign in</a></p>
+      </div>
+
+      <div id="step2" class="step">
+        <h1 class="title">Company info</h1>
+        <p class="sub">Tell us about your business. Your code is already yours.</p>
+        <div class="error" id="error2"></div>
+        <div class="field">
+          <label for="companyName">Company name</label>
+          <input id="companyName" type="text" placeholder="Nesp Café" />
+        </div>
+        <div class="field">
+          <label for="companyDescription">Description</label>
+          <textarea id="companyDescription" placeholder="A short description of your business (optional)"></textarea>
+        </div>
+        <button id="finishBtn" class="btn">Finish</button>
+        <p class="hint"><a href="/">Back to home</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="register.js"></script>
+</body>
+</html>

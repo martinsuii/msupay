@@ -1,0 +1,29 @@
+{
+  "name": "nesppay",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Crypto payment processor: per-invoice addresses, payment confirmation, merchant settlement, webhooks",
+  "scripts": {
+    "build": "node scripts/build-public.mjs",
+    "prestart": "npm run build",
+    "start": "node src/server.js",
+    "precafe": "npm run build",
+    "cafe": "node src/cafe-server.js",
+    "invoice": "node src/index.js invoice",
+    "watch": "node src/index.js watch"
+  },
+  "dependencies": {
+    "bitcoinjs-lib": "^7.0.1",
+    "dotenv": "^16.4.5",
+    "ecpair": "^3.0.2",
+    "ethers": "^6.13.2",
+    "express": "^4.19.2",
+    "jsqr": "^1.4.0",
+    "pdfkit": "^0.15.0",
+    "qrcode": "^1.5.4",
+    "tiny-secp256k1": "^2.2.4"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

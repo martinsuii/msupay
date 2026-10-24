@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docs — NespPay</title>
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Nesp<span class="brand-accent">Pay</span></span>
+      </a>
+      <div class="nav-actions">
+        <a class="nav-link" href="/">Home</a>
+        <button id="themeBtn" class="theme-btn" aria-label="Toggle dark mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="docs">
+    <aside class="sidebar">
+      <nav class="toc">
+        <a href="#overview">Overview</a>
+        <a href="#quickstart">Quick start</a>
+        <a href="#links">Payment links</a>
+        <a href="#invoice">Create an invoice</a>
+        <a href="#webhooks">Webhooks</a>
+        <a href="#api">API</a>
+      </nav>
+    </aside>
+
+    <article class="content">
+      <h1 class="page-title">NespPay Documentation</h1>
+      <p class="lede">Accept ETH, BTC, and LTC payments with signed payment links, webhooks, and a hosted payment page.</p>
+
+      <section id="overview">
+        <h2>Overview</h2>
+        <p>Create a signed payment link, share it with your customer, and receive status updates by webhook. Settlement and refunds are controlled from the payment page or your merchant account.</p>
+      </section>
+
+      <section id="quickstart">
+        <h2>Quick start</h2>
+        <pre><code>cp .env.example .env   # configure your environment
+npm install
+npm start              # http://localhost:3000</code></pre>
+        <p>Register a merchant account at <code>/register</code>, then use its company code in your payment links.</p>
+      </section>
+
+      <section id="links">
+        <h2>Payment links</h2>
+        <p>Pass a signed <code>payinfo</code> token to the payment page:</p>
+        <pre><code>https://your-host/pay?payinfo=&lt;token&gt;</code></pre>
+        <p>Optional redirects (base64url-encoded) after completion or cancellation:</p>
+        <pre><code>https://your-host/pay?payinfo=&lt;token&gt;&amp;returns=&lt;url&gt;&amp;returnf=&lt;url&gt;</code></pre>
+      </section>
+
+      <section id="invoice">
+        <h2>Create an invoice</h2>
+        <p>Sign a payinfo with your merchant Bearer token, then create an invoice from it. The creation response includes an <code>accessToken</code> for the payer.</p>
+        <pre><code>POST /api/sign
+Authorization: Bearer &lt;merchant-token&gt;
+{ "companyCode": "ABC12345", "eur": "2.50", "product": "Coffee" }
+
+POST /api/invoice
+{ "payinfo": "&lt;signed-token&gt;", "coin": "ETH" }
+</code></pre>
+        <p>To settle or refund, send the merchant Bearer token or the invoice's <code>X-Invoice-Token</code>:</p>
+        <pre><code>POST /api/invoice/&lt;id&gt;/pay
+POST /api/invoice/&lt;id&gt;/cancel
+</code></pre>
+      </section>
+
+      <section id="webhooks">
+        <h2>Webhooks</h2>
+        <p>Configure a webhook URL in the dashboard. Each POST includes an <code>X-NespPay-Signature</code> header. Verify it before trusting the payload:</p>
+        <pre><code>const expected = 'sha256=' + crypto
+  .createHmac('sha256', WEBHOOK_SECRET)
+  .update(rawBody)
+  .digest('hex');
+
+if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
+  return res.sendStatus(400);
+}</code></pre>
+        <p>Respond with any 2xx status. Failed deliveries are retried with backoff.</p>
+      </section>
+
+      <section id="api">
+        <h2>API</h2>
+        <table>
+          <thead>
+            <tr><th>Method</th><th>Path</th><th>Auth</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>POST</code></td><td><code>/api/register</code></td><td>—</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/login</code></td><td>—</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/logout</code></td><td>Bearer</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/account</code></td><td>Bearer</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/sign</code></td><td>Bearer or sign key</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/invoice</code></td><td>Signed payinfo</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/invoice/:id</code></td><td>—</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/invoice/:id/pay</code></td><td>Bearer or invoice token</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/invoice/:id/cancel</code></td><td>Bearer or invoice token</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/invoice/:id/events</code></td><td>—</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/rates</code></td><td>—</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/webhook/config</code></td><td>Bearer</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/transactions</code></td><td>Bearer</td></tr>
+          </tbody>
+        </table>
+        <p>Invoice statuses: <code>pending</code>, <code>paid</code>, <code>underpaid</code>, <code>forwarded</code>, <code>refunded</code>, <code>expired</code>, <code>forward_failed</code>, <code>refund_failed</code>.</p>
+      </section>
+    </article>
+  </main>
+
+  <script src="theme.js"></script>
+</body>
+</html>

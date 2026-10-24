@@ -1,0 +1,87 @@
+:root {
+  --brand-accent: #4338ca;
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --ink: #1f2937;
+  --ink-soft: #5f6368;
+  --border: #e5e7eb;
+  --hover: #f1f3f4;
+}
+
+[data-theme="dark"] {
+  --bg: #0b0d12;
+  --card: #16181d;
+  --ink: #e8eaed;
+  --ink-soft: #9aa0a6;
+  --border: #262a33;
+  --hover: #1e2128;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Google Sans", "Product Sans", Roboto, system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.3s, color 0.3s;
+}
+
+a { color: var(--brand-accent); text-decoration: none; }
+
+.topbar { background: var(--card); border-bottom: 1px solid var(--border); transition: background 0.3s; }
+.topbar-inner {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); }
+.brand-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #312e81, #4338ca, #0e7490, #6d28d9, #312e81);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+.brand-name { font-size: 1.15rem; font-weight: 600; letter-spacing: -0.01em; }
+.brand-accent { color: var(--brand-accent); }
+.topbar-actions { display: flex; align-items: center; gap: 14px; }
+.topbar-link { color: var(--ink-soft); font-size: 0.9rem; font-weight: 500; }
+.topbar-link:hover { color: var(--ink); }
+.theme-btn {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.theme-btn:hover { background: var(--hover); }
+.theme-btn svg { width: 20px; height: 20px; }
+.theme-btn .icon-moon { display: none; }
+[data-theme="dark"] .theme-btn .icon-sun { display: none; }
+[data-theme="dark"] .theme-btn .icon-moon { display: block; }
+
+.page {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+.page h1 { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; }
+.updated { color: var(--ink-soft); font-size: 0.85rem; margin: 0 0 28px; }
+.page h2 { font-size: 1.2rem; font-weight: 600; margin: 28px 0 10px; }
+.page p { line-height: 1.7; color: var(--ink); margin: 0 0 14px; }
+.page ul { padding-left: 22px; line-height: 1.7; }
+.page li { margin-bottom: 8px; }
+.page table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 0.92rem; }
+.page th, .page td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.page th { color: var(--ink-soft); font-weight: 600; font-size: 0.85rem; }

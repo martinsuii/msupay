@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nesp Café</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+          <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+          <line x1="6" y1="1" x2="6" y2="4"></line>
+          <line x1="10" y1="1" x2="10" y2="4"></line>
+          <line x1="14" y1="1" x2="14" y2="4"></line>
+        </svg>
+        <span class="brand-name">Nesp<span class="brand-accent">Café</span></span>
+      </div>
+      <div class="nav-actions">
+        <span class="powered">Powered by <strong>NespPay</strong></span>
+        <button id="themeBtn" class="theme-btn" aria-label="Toggle dark mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1 class="hero-title">Freshly brewed.<br /><span class="grad">Freshly baked.</span></h1>
+      <p class="hero-sub">A single perfect cookie and a proper black coffee. That's the whole menu.</p>
+    </section>
+
+    <section class="menu">
+      <div class="menu-item reveal">
+        <div class="item-art">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+            <line x1="6" y1="1" x2="6" y2="4"></line>
+            <line x1="10" y1="1" x2="10" y2="4"></line>
+            <line x1="14" y1="1" x2="14" y2="4"></line>
+          </svg>
+        </div>
+        <h2 class="item-name">Black Coffee</h2>
+        <p class="item-desc">Dark roast, served hot. No nonsense.</p>
+        <div class="item-price">€2.50</div>
+        <div class="item-price-eth" id="coffeeEth">≈ …</div>
+        <button class="order-btn" data-item="coffee">Order</button>
+      </div>
+
+      <div class="menu-item reveal">
+        <div class="item-art">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <circle cx="8.5" cy="9" r="1" fill="currentColor" stroke="none"></circle>
+            <circle cx="13.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"></circle>
+            <circle cx="15.5" cy="12" r="1" fill="currentColor" stroke="none"></circle>
+            <circle cx="9" cy="14" r="1.2" fill="currentColor" stroke="none"></circle>
+            <circle cx="13" cy="15.5" r="0.9" fill="currentColor" stroke="none"></circle>
+          </svg>
+        </div>
+        <h2 class="item-name">Cookie</h2>
+        <p class="item-desc">Freshly baked, chocolate chip. Just one.</p>
+        <div class="item-price">€1.50</div>
+        <div class="item-price-eth" id="cookieEth">≈ …</div>
+        <button class="order-btn" data-item="cookie">Order</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <h2 id="modalTitle" class="modal-title">Black Coffee</h2>
+      <p id="modalPrice" class="modal-price">€2.50</p>
+      <p id="modalPriceEth" class="modal-price-eth">≈ …</p>
+      <label class="field">
+        <span>Your name</span>
+        <input id="nameInput" type="text" placeholder="Jane" />
+      </label>
+      <button id="payBtn" class="pay-btn">Pay with NespPay</button>
+      <button id="closeBtn" class="close-btn">Cancel</button>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>Nesp Café · accepts ETH on Ethereum mainnet via NespPay</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment successful — Nesp Café</title>
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    const t = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', t);
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+          <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+          <line x1="6" y1="1" x2="6" y2="4"></line>
+          <line x1="10" y1="1" x2="10" y2="4"></line>
+          <line x1="14" y1="1" x2="14" y2="4"></line>
+        </svg>
+        <span class="brand-name">Nesp<span class="brand-accent">Café</span></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="result">
+    <div class="result-icon">
+      <svg class="check" viewBox="0 0 52 52">
+        <circle class="check-circle" cx="26" cy="26" r="24"></circle>
+        <path class="check-mark" fill="none" d="M14 27l8 8 16-16"></path>
+      </svg>
+    </div>
+    <h1 class="result-title">Payment successful!</h1>
+    <p class="result-sub" id="resultSub">Thank you!</p>
+    <p class="result-meta" id="resultMeta"></p>
+    <a class="back-btn" href="/">Back to café</a>
+  </main>
+
+  <script>
+    const p = new URLSearchParams(location.search);
+    const item = p.get('item') === 'cookie' ? 'Cookie' : 'Black Coffee';
+    const name = p.get('name') || 'there';
+    const order = p.get('order');
+    const eur = p.get('eur');
+    const meta = eur ? `Order #${order} · €${eur}` : `Order #${order}`;
+    document.getElementById('resultSub').textContent = `Thank you, ${name}! Your ${item.toLowerCase()} is being prepared.`;
+    document.getElementById('resultMeta').textContent = meta;
+  </script>
+</body>
+</html>
