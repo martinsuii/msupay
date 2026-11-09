@@ -22,6 +22,9 @@ function rowToInvoice(row) {
     error: row.error,
     accessToken: row.access_token,
     expiresAt: row.expires_at,
+    notifyStatus: row.notify_status || null,
+    notifySentAt: row.notify_sent_at || null,
+    notifyError: row.notify_error || null,
     createdAt: row.created_at,
   };
 }
@@ -92,7 +95,10 @@ export function updateInvoice(id, patch) {
       settled_amount_wei = ?,
       error = ?,
       access_token = ?,
-      expires_at = ?
+      expires_at = ?,
+      notify_status = ?,
+      notify_sent_at = ?,
+      notify_error = ?
     WHERE id = ?
   `);
 
@@ -113,10 +119,26 @@ export function updateInvoice(id, patch) {
     updated.error || null,
     updated.accessToken || null,
     updated.expiresAt || null,
+    updated.notifyStatus || null,
+    updated.notifySentAt || null,
+    updated.notifyError || null,
     id
   );
 
   return getInvoice(id);
+}
+
+// Record the outcome of the merchant payment email without touching the rest
+// of the invoice row (and without generating a new invoice version).
+export function updateInvoiceNotification(id, { status = null, sentAt = null, error = null } = {}) {
+  if (!id) return false;
+  const db = getDb();
+  const result = db.prepare(`
+    UPDATE invoices
+    SET notify_status = ?, notify_sent_at = COALESCE(?, notify_sent_at), notify_error = ?
+    WHERE id = ?
+  `).run(status, sentAt, error, id);
+  return (result.changes ?? 0) > 0;
 }
 
 export function listInvoices() {

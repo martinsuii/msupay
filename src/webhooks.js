@@ -95,17 +95,8 @@ export function publicInvoice(inv) {
   return safe;
 }
 
-export function getWebhookDeliveries(companyCode, limit = 50) {
-  if (!companyCode) return [];
-  const db = getDb();
-  const rows = db.prepare(`
-    SELECT * FROM webhook_deliveries
-    WHERE company_code = ?
-    ORDER BY created_at DESC
-    LIMIT ?
-  `).all(companyCode, limit);
-
-  return rows.map((r) => ({
+function rowToDelivery(r) {
+  return {
     id: r.id,
     companyCode: r.company_code,
     invoiceId: r.invoice_id,
@@ -119,7 +110,37 @@ export function getWebhookDeliveries(companyCode, limit = 50) {
     responseBody: r.response_body,
     createdAt: r.created_at,
     lastAttemptAt: r.last_attempt_at,
-  }));
+  };
+}
+
+export function getWebhookDeliveries(companyCode, limit = 50) {
+  if (!companyCode) return [];
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT * FROM webhook_deliveries
+    WHERE company_code = ?
+    ORDER BY created_at DESC
+    LIMIT ?
+  `).all(companyCode, limit);
+
+  return rows.map(rowToDelivery);
+}
+
+// Admin view across every merchant.
+export function listAllWebhookDeliveries(limit = 500) {
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT * FROM webhook_deliveries
+    ORDER BY created_at DESC
+    LIMIT ?
+  `).all(limit);
+
+  return rows.map(rowToDelivery);
+}
+
+export function countWebhookDeliveries() {
+  const db = getDb();
+  return db.prepare('SELECT COUNT(*) AS count FROM webhook_deliveries').get().count;
 }
 
 async function executeDelivery({ deliveryId, url, secret, event, payloadStr, attempt = 1, companyCode, invoiceId }) {

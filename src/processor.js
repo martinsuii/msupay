@@ -10,6 +10,7 @@ import { findByCode } from './accounts.js';
 import { isUtxoCoin } from './coins.js';
 import { dispatchInvoiceEvent } from './webhooks.js';
 import { broadcastInvoiceUpdate } from './events.js';
+import { notifyInvoicePaid } from './mailer.js';
 
 export function createProvider() {
   if (config.rpcWsUrl) {
@@ -140,6 +141,10 @@ export async function processExistingInvoice(id, { onUpdate } = {}) {
   });
 
     notify(finalStatus, updatedInvoice, onUpdate);
+    if (finalStatus === 'paid') {
+      // Fire-and-forget so payment confirmation never waits on an SMTP server.
+      notifyInvoicePaid(updatedInvoice).catch((e) => console.error('[mail]', e));
+    }
     return updatedInvoice;
   } finally {
     activeWatchers.delete(id);

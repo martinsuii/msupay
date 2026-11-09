@@ -40,6 +40,9 @@ function migrateSchema(db) {
   ensureColumn(db, 'accounts', 'token_expires_at', 'TEXT');
   ensureColumn(db, 'invoices', 'access_token', 'TEXT');
   ensureColumn(db, 'invoices', 'expires_at', 'TEXT');
+  ensureColumn(db, 'invoices', 'notify_status', 'TEXT');
+  ensureColumn(db, 'invoices', 'notify_sent_at', 'TEXT');
+  ensureColumn(db, 'invoices', 'notify_error', 'TEXT');
 
   // Existing rows predate these columns: give them a usable token and a
   // bounded lifetime instead of leaving them valid forever.
@@ -133,6 +136,12 @@ function initSchema(db) {
 
     CREATE INDEX IF NOT EXISTS idx_webhook_company ON webhook_deliveries(company_code);
     CREATE INDEX IF NOT EXISTS idx_webhook_created ON webhook_deliveries(created_at);
+
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
   `);
 }
 

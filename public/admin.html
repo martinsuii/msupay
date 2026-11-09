@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin — MSU Pay</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">
+        <span class="brand-dot"></span>
+        <span class="brand-name">MSU<span class="brand-accent"> Pay</span></span>
+      </a>
+      <div class="topbar-actions">
+        <span class="admin-badge">Admin</span>
+        <a class="topbar-link" href="/">Home</a>
+        <button id="themeBtn" class="theme-btn" aria-label="Toggle dark mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+          </svg>
+        </button>
+        <button id="logoutBtn" class="logout-btn hidden">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <section id="loginView" class="login-wrap">
+    <div class="login-card">
+      <h1>Admin console</h1>
+      <p>Enter the long admin secret key to continue.</p>
+      <form id="loginForm" autocomplete="off">
+        <label for="adminKey">Admin secret key</label>
+        <input id="adminKey" type="password" autocomplete="off" spellcheck="false" placeholder="Paste the key from data/admin.key" required />
+        <button class="btn" type="submit" id="loginBtn">Unlock admin</button>
+      </form>
+      <p id="loginMsg" class="form-msg" role="status"></p>
+      <p class="login-hint">The key is stored at <code>data/admin.key</code> unless <code>ADMIN_SECRET_KEY</code> is set.</p>
+    </div>
+  </section>
+
+  <div id="appView" class="dash hidden">
+    <aside class="sidebar">
+      <nav class="side-nav">
+        <a href="#overview" class="side-link active" data-target="overview">Overview</a>
+        <a href="#accounts" class="side-link" data-target="accounts">Accounts</a>
+        <a href="#invoices" class="side-link" data-target="invoices">Invoices</a>
+        <a href="#webhooks" class="side-link" data-target="webhooks">Webhooks</a>
+        <a href="#email" class="side-link" data-target="email">Email / SMTP</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <h1 class="dash-title">Admin</h1>
+      <p class="dash-sub">Full operational view. Private account keys and secrets are never included.</p>
+
+      <section id="overview" class="admin-section">
+        <div class="stats">
+          <div class="stat-card"><span class="stat-label">Accounts</span><span class="stat-value" id="ovAccounts">—</span></div>
+          <div class="stat-card"><span class="stat-label">Invoices</span><span class="stat-value" id="ovInvoices">—</span></div>
+          <div class="stat-card"><span class="stat-label">Webhook deliveries</span><span class="stat-value" id="ovDeliveries">—</span></div>
+          <div class="stat-card"><span class="stat-label">Statuses</span><span class="stat-value small" id="ovStatuses">—</span></div>
+        </div>
+
+        <div class="stats stats-3">
+          <div class="stat-card"><span class="stat-label">ETH volume</span><span class="stat-value small" id="ovEth">—</span></div>
+          <div class="stat-card"><span class="stat-label">BTC volume</span><span class="stat-value small" id="ovBtc">—</span></div>
+          <div class="stat-card"><span class="stat-label">LTC volume</span><span class="stat-value small" id="ovLtc">—</span></div>
+        </div>
+
+        <section class="panel">
+          <h2>Recent invoices</h2>
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>Created</th><th>Company</th><th>Amount</th><th>Status</th><th>Email</th></tr></thead>
+              <tbody id="ovRecentInvoices"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Recent webhook deliveries</h2>
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>When</th><th>Event</th><th>Company</th><th>Status</th></tr></thead>
+              <tbody id="ovRecentDeliveries"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="accounts" class="admin-section hidden">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Accounts</h2>
+              <p class="panel-sub">Public wallet addresses and company metadata only. Private keys, password hashes, session tokens, and webhook secrets are redacted.</p>
+            </div>
+            <button class="btn btn-ghost" data-refresh="accounts">Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Company</th><th>Code</th><th>Email</th><th>ETH address</th><th>BTC address</th><th>LTC address</th><th>Invoices</th><th>Last invoice</th><th>Created</th></tr>
+              </thead>
+              <tbody id="accountsBody"><tr><td colspan="9" class="empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="invoices" class="admin-section hidden">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Invoices</h2>
+              <p class="panel-sub">All merchants. Invoice private keys and payer capability tokens are never shown.</p>
+            </div>
+            <button class="btn btn-ghost" data-refresh="invoices">Refresh</button>
+          </div>
+          <div class="filter-row">
+            <select id="invoiceStatus">
+              <option value="">All statuses</option>
+              <option>pending</option><option>paid</option><option>underpaid</option><option>forwarded</option>
+              <option>refunded</option><option>expired</option><option>forward_failed</option><option>refund_failed</option>
+            </select>
+            <input id="invoiceCompany" type="text" placeholder="Company code" />
+            <input id="invoiceSearch" type="text" placeholder="Search id, address, tx hash…" />
+            <button class="btn" id="invoiceFilterBtn">Apply</button>
+          </div>
+          <p class="table-meta" id="invoiceMeta"></p>
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Created</th><th>Company</th><th>Coin</th><th>Expected</th><th>Received</th><th>Status</th><th>Notify</th><th>Address</th><th>Tx</th></tr>
+              </thead>
+              <tbody id="invoicesBody"><tr><td colspan="9" class="empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="webhooks" class="admin-section hidden">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Webhook deliveries</h2>
+              <p class="panel-sub">Every delivery attempt across all merchants, newest first.</p>
+            </div>
+            <button class="btn btn-ghost" data-refresh="webhooks">Refresh</button>
+          </div>
+          <p class="table-meta" id="webhookMeta"></p>
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>When</th><th>Event</th><th>Company</th><th>URL</th><th>Result</th><th>Attempts</th><th>Error</th></tr></thead>
+              <tbody id="webhooksBody"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="email" class="admin-section hidden">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Payment email / SMTP</h2>
+              <p class="panel-sub">When an invoice is confirmed, MSU Pay emails the merchant from this noreply address: “Your business got a payment”.</p>
+            </div>
+          </div>
+
+          <form id="smtpForm" class="smtp-form" autocomplete="off">
+            <label class="check-row"><input id="smtpEnabled" type="checkbox" /> Enable payment notification emails</label>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="smtpHost">SMTP host</label>
+                <input id="smtpHost" type="text" placeholder="smtp.example.com" />
+              </div>
+              <div class="field">
+                <label for="smtpPort">Port</label>
+                <input id="smtpPort" type="number" min="1" max="65535" placeholder="587" />
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label class="check-row"><input id="smtpSecure" type="checkbox" /> Implicit TLS (usually port 465)</label>
+              <label class="check-row"><input id="smtpRequireTls" type="checkbox" /> Require STARTTLS (usually port 587)</label>
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="smtpUser">SMTP username</label>
+                <input id="smtpUser" type="text" autocomplete="off" placeholder="noreply@example.com" />
+              </div>
+              <div class="field">
+                <label for="smtpPassword">SMTP password</label>
+                <input id="smtpPassword" type="password" autocomplete="new-password" placeholder="Leave blank to keep current password" />
+              </div>
+            </div>
+            <label class="check-row"><input id="smtpClearPassword" type="checkbox" /> Clear the stored SMTP password</label>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="smtpFromName">From name</label>
+                <input id="smtpFromName" type="text" placeholder="MSU Pay" />
+              </div>
+              <div class="field">
+                <label for="smtpFromEmail">Noreply From address</label>
+                <input id="smtpFromEmail" type="email" placeholder="noreply@yourdomain.com" />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn" type="submit" id="smtpSaveBtn">Save SMTP settings</button>
+              <span id="smtpSaveMsg" class="form-msg" role="status"></span>
+            </div>
+          </form>
+
+          <div class="smtp-test">
+            <h3>Send a test email</h3>
+            <div class="filter-row">
+              <input id="smtpTestTo" type="email" placeholder="you@example.com" />
+              <button class="btn btn-ghost" id="smtpTestBtn" type="button">Send test</button>
+              <span id="smtpTestMsg" class="form-msg" role="status"></span>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

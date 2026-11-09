@@ -8,6 +8,7 @@ function required(name) {
 
 export const config = {
   port: Number(process.env.PORT ?? 3000),
+  publicBaseUrl: (process.env.PUBLIC_BASE_URL || `http://localhost:${process.env.PORT ?? 3000}`).replace(/\/+$/, ''),
   rpcUrl: required('RPC_URL'),
   rpcWsUrl: process.env.RPC_WS_URL || undefined,
   masterEncryptionKey: process.env.MASTER_ENCRYPTION_KEY || undefined,

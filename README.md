@@ -25,6 +25,7 @@ receipts, QR codes, and a small demo storefront (the "café").
 - [Configuration](#configuration)
 - [Payment flow](#payment-flow)
 - [API reference](#api-reference)
+- [Admin console](#admin-console)
 - [Webhooks](#webhooks)
 - [Invoice statuses](#invoice-statuses)
 - [Security model](#security-model)
@@ -56,6 +57,10 @@ receipts, QR codes, and a small demo storefront (the "café").
 - **Merchant workspace** at `/dashboard`: company profile, payment links,
   transactions, earnings, wallet export, ETH withdrawal, webhook settings and
   delivery history.
+- **Admin console** at `/admin`, protected by a long secret key, with
+  cross-merchant accounts, invoices, webhook deliveries, and SMTP settings.
+- **Payment emails** — when an invoice is confirmed, email the merchant
+  “Your business got a payment” through your own SMTP provider.
 - **PDF receipts** and QR images for every invoice.
 - **Encrypted key storage** — wallet and invoice private keys are encrypted at
   rest with AES-256-GCM.
@@ -130,6 +135,8 @@ npm start
 - Configure a webhook URL in the dashboard.
 - Health check: `curl http://localhost:3000/api/status` → `{"ok":true}`.
 - Interactive docs: `/docs`; payment-link tester: `/paytester`.
+- Admin console: <http://localhost:3000/admin>. On first start a 64-character
+  key is generated at `data/admin.key` (or set `ADMIN_SECRET_KEY`).
 
 The database `data/msupay.db` is created on first start. Unless configured
 through the environment, the secrets `data/master.key`, `data/payinfo-secret`,
@@ -146,6 +153,9 @@ See [`.env.example`](.env.example) for the annotated template.
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `PORT` | `3000` | HTTP port for the backend and frontend. |
+| `PUBLIC_BASE_URL` | `http://localhost:PORT` | Public origin used in links inside merchant payment emails. |
+| `ADMIN_SECRET_KEY` | generated | Long key for `/admin` (minimum 32 characters); otherwise `data/admin.key`. |
+| `ADMIN_SESSION_HOURS` | `12` | Admin login lifetime in hours (1–168). |
 | `RPC_URL` | **required** | Ethereum JSON-RPC URL (mainnet). |
 | `RPC_WS_URL` | — | Optional WebSocket RPC; falls back to HTTP on failure. |
 | `MAIN_PRIVATE_KEY` | **required** | Private key of the global fallback settlement account, used for invoices without a company code. Required at startup even when all invoices belong to merchants. |
@@ -343,10 +353,67 @@ a `5xx` money action; refresh the invoice first.
 | `/` | Landing page. |
 | `/register`, `/login` | Merchant onboarding and sign-in. |
 | `/dashboard` | Merchant workspace. |
+| `/admin` | Admin console (long secret key required). |
 | `/pay?payinfo=...` | Hosted checkout (redirects to `/` without a payinfo). |
 | `/paytester` | Payment-link builder for signed-in merchants. |
 | `/docs` | Short in-app API documentation. |
 | `/terms`, `/privacy` | Legal pages. |
+
+### Admin endpoints (admin session cookie)
+
+The admin console authenticates with a long key, then sets an `HttpOnly`,
+`SameSite=Strict` session cookie. Login attempts are rate-limited to 6/min.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/api/admin/login` | Body: `key`. Sets the admin session cookie. |
+| `POST` | `/api/admin/logout` | Clears the admin session. |
+| `GET` | `/api/admin/session` | Session check. |
+| `GET` | `/api/admin/overview` | Counts, volumes, recent invoices/deliveries, and SMTP state. |
+| `GET` | `/api/admin/accounts` | All accounts with public addresses and invoice summaries. |
+| `GET` | `/api/admin/invoices` | All invoices; supports `limit`, `offset`, `status`, `companyCode`, `q`. |
+| `GET` | `/api/admin/webhooks` | All delivery attempts; supports `limit`. |
+| `GET` | `/api/admin/smtp` | SMTP config with the password redacted (`hasPassword`). |
+| `PUT` | `/api/admin/smtp` | Save SMTP host/port/TLS/auth/From settings. |
+| `POST` | `/api/admin/smtp/test` | Body: `to`. Send a test email. |
+
+---
+
+## Admin console
+
+Open `/admin` and paste the key from `data/admin.key` (or use
+`ADMIN_SECRET_KEY`). On first start the key is generated from 48 random bytes
+(64 base64url characters) and written with mode `0600`. The session cookie is
+`HttpOnly`, `SameSite=Strict`, and signed with the admin key; it expires after
+`ADMIN_SESSION_HOURS` (default 12).
+
+The console shows every merchant, invoice, and webhook delivery, plus aggregate
+volumes and payment-email state. Private data is deliberately excluded: admin
+APIs never return password hashes, wallet private keys, encrypted key blobs,
+merchant bearer/session tokens, invoice private keys, invoice capability
+tokens, or webhook signing secrets.
+
+### Payment emails (SMTP)
+
+In **Email / SMTP** configure:
+
+- host and port, with implicit TLS (usually `465`) or required STARTTLS
+  (usually `587`);
+- optional username/password — the password is encrypted with the master key
+  and never returned to the browser;
+- From name and a valid noreply From address;
+- **Enable payment notification emails**.
+
+Use **Send test** to verify the provider. When an invoice becomes `paid`,
+MSU Pay emails the merchant account's address with subject
+`Your business got a payment — <company>`, the amount, invoice id, company
+code, and a link to `PUBLIC_BASE_URL/dashboard`.
+
+Delivery is fire-and-forget so payment confirmation never waits on SMTP. The
+outcome is stored on the invoice (`notifyStatus`, `notifySentAt`,
+`notifyError`) and shown in the admin invoice table. SMTP settings live in the
+`settings` table; the password is encrypted at rest with the same
+`data/master.key` used for wallet keys.
 
 ---
 
@@ -489,6 +556,13 @@ coin's base unit (wei for ETH, satoshi for BTC, litoshi for LTC).
 - **Public views** never expose private keys, webhook secrets, or invoice
   capability tokens. Webhook secrets are shown only to the authenticated
   merchant.
+- **Admin authentication** uses a long secret key (generated at
+  `data/admin.key` or supplied as `ADMIN_SECRET_KEY`), constant-time key
+  comparison, and an HMAC-signed `HttpOnly`/`SameSite=Strict` session cookie.
+  Admin APIs return redacted account data: no password hashes, private keys,
+  bearer tokens, capability tokens, or webhook secrets.
+- **SMTP passwords** are encrypted at rest with AES-256-GCM and the master key;
+  admin responses only report whether a password is stored.
 
 Operational rules:
 
@@ -497,7 +571,8 @@ Operational rules:
   bearer token but no password re-entry. Protect the dashboard and tokens
   accordingly.
 - Keep `MAIN_PRIVATE_KEY`, `MASTER_ENCRYPTION_KEY`, `PAYINFO_SECRET`,
-  `SIGN_API_KEY`, and `data/` out of version control and client-side code.
+  `SIGN_API_KEY`, `ADMIN_SECRET_KEY`, `data/admin.key`, and `data/` out of
+  version control and client-side code.
 - Back up `data/` (database and secret files) securely. Losing `master.key`
   permanently loses access to encrypted wallet keys.
 - Never enable `ALLOW_PRIVATE_WEBHOOKS` in production.
@@ -525,6 +600,9 @@ Operational rules:
 │   ├── rates.js         # CoinGecko EUR rates with cache
 │   ├── coins.js         # coin metadata, unit conversion, QR URIs
 │   ├── webhooks.js      # signing, delivery, retries, SSRF validation
+│   ├── admin.js         # admin key, signed session cookie, auth guard
+│   ├── settings.js      # persistent settings and encrypted SMTP config
+│   ├── mailer.js        # SMTP transport and merchant payment emails
 │   ├── events.js        # SSE broker
 │   ├── ratelimit.js     # in-memory fixed-window limiter
 │   ├── receipt.js       # PDF receipts
@@ -598,6 +676,9 @@ built-in demo credentials.
   next start.
 - **Webhook retries** do not survive a restart, deliveries are unbounded, and
   there is no pruning or manual replay endpoint.
+- **Payment emails** are sent fire-and-forget with no persistent retry queue.
+  A failed send is recorded on the invoice (and visible in `/admin`), but it is
+  not retried automatically.
 - **Exchange rates** come from CoinGecko's public API (60s cache, stale
   fallback); the amount is locked at invoice creation, but rate availability is
   a dependency for creating new invoices.

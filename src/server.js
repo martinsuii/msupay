@@ -21,15 +21,25 @@ import { COINS, toUnits, fromUnits, qrUri } from './coins.js';
 import { getEurRates } from './rates.js';
 import { getDb } from './db.js';
 import { handleInvoiceSSE } from './events.js';
-import { getWebhookDeliveries, sendTestWebhook, validateWebhookUrl } from './webhooks.js';
+import {
+  countWebhookDeliveries,
+  getWebhookDeliveries,
+  listAllWebhookDeliveries,
+  sendTestWebhook,
+  validateWebhookUrl,
+} from './webhooks.js';
 import { rateLimit } from './ratelimit.js';
 import { minifiedStatic } from './minified-static.js';
 import { generateWebhookSecret, getSigningApiKey } from './security.js';
+import { getAdminKey, adminKeySource, verifyAdminKey, startAdminSession, endAdminSession, requireAdmin } from './admin.js';
+import { getSmtpConfigPublic, saveSmtpConfig } from './settings.js';
+import { sendTestEmail } from './mailer.js';
 import {
   createAccount,
   findByEmail,
   findByToken,
   findByCode,
+  listAccountsForAdmin,
   verifyPassword,
   updateAccount,
   deleteAccount,
@@ -99,10 +109,20 @@ app.get('/register', (req, res) => res.sendFile(join(PUBLIC_DIR, 'register.html'
 app.get('/login', (req, res) => res.sendFile(join(PUBLIC_DIR, 'login.html')));
 app.get('/dashboard', (req, res) => res.sendFile(join(PUBLIC_DIR, 'dashboard.html')));
 
+// Admin console. The HTML is public, but every admin API is guarded by the
+// long-lived admin key session cookie.
+app.get('/admin', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  res.sendFile(join(PUBLIC_DIR, 'admin.html'));
+});
+
 const authLimiter = rateLimit({ windowMs: 60_000, max: 10, name: 'auth' });
 const signLimiter = rateLimit({ windowMs: 60_000, max: 30, name: 'sign' });
 const invoiceLimiter = rateLimit({ windowMs: 60_000, max: 20, name: 'invoice' });
 const actionLimiter = rateLimit({ windowMs: 60_000, max: 20, name: 'action' });
+const adminLoginLimiter = rateLimit({ windowMs: 60_000, max: 6, name: 'admin-login' });
+const adminActionLimiter = rateLimit({ windowMs: 60_000, max: 30, name: 'admin-action' });
 
 function bearerToken(req) {
   const header = req.headers.authorization || '';
@@ -498,6 +518,152 @@ app.get('/api/invoice/:id/qr', invoiceLimiter, async (req, res) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// Admin console API
+// ---------------------------------------------------------------------------
+
+app.post('/api/admin/login', adminLoginLimiter, (req, res) => {
+  const key = typeof req.body?.key === 'string' ? req.body.key : '';
+  if (!verifyAdminKey(key)) return res.status(401).json({ error: 'invalid admin key' });
+  startAdminSession(req, res);
+  res.json({ ok: true });
+});
+
+app.post('/api/admin/logout', (req, res) => {
+  endAdminSession(req, res);
+  res.json({ ok: true });
+});
+
+app.get('/api/admin/session', requireAdmin, (req, res) => {
+  res.json({ authenticated: true });
+});
+
+function adminLimit(value, fallback = 500, max = 2000) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return fallback;
+  return Math.min(max, Math.floor(n));
+}
+
+function adminInvoiceRows() {
+  return listInvoices().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+}
+
+app.get('/api/admin/overview', requireAdmin, (req, res) => {
+  const accounts = listAccountsForAdmin();
+  const invoices = adminInvoiceRows();
+  const statuses = {};
+  const volumeWei = { ETH: 0n, BTC: 0n, LTC: 0n };
+
+  for (const inv of invoices) {
+    statuses[inv.status] = (statuses[inv.status] || 0) + 1;
+    if (inv.status === 'paid' || inv.status === 'forwarded') {
+      const coin = inv.coin || 'ETH';
+      if (volumeWei[coin] !== undefined) {
+        try {
+          volumeWei[coin] += BigInt(inv.paidAmountWei || '0');
+        } catch {
+          /* ignore malformed historical amount */
+        }
+      }
+    }
+  }
+
+  res.json({
+    accounts: accounts.length,
+    invoices: invoices.length,
+    statuses,
+    volumeWei: Object.fromEntries(Object.entries(volumeWei).map(([coin, value]) => [coin, value.toString()])),
+    webhookDeliveries: countWebhookDeliveries(),
+    recentInvoices: invoices.slice(0, 8).map(publicInvoice),
+    recentDeliveries: listAllWebhookDeliveries(8),
+    smtp: getSmtpConfigPublic(),
+  });
+});
+
+app.get('/api/admin/accounts', requireAdmin, (req, res) => {
+  const summaries = new Map();
+  for (const inv of listInvoices()) {
+    const code = inv.companyCode || '';
+    if (!code) continue;
+    let summary = summaries.get(code);
+    if (!summary) {
+      summary = { invoiceCount: 0, statuses: {}, lastInvoiceAt: null };
+      summaries.set(code, summary);
+    }
+    summary.invoiceCount += 1;
+    summary.statuses[inv.status] = (summary.statuses[inv.status] || 0) + 1;
+    if (!summary.lastInvoiceAt || String(inv.createdAt || '') > summary.lastInvoiceAt) {
+      summary.lastInvoiceAt = inv.createdAt || null;
+    }
+  }
+
+  const accounts = listAccountsForAdmin().map((account) => ({
+    ...account,
+    ...(summaries.get(account.companyCode) || { invoiceCount: 0, statuses: {}, lastInvoiceAt: null }),
+  }));
+  res.json({ accounts });
+});
+
+app.get('/api/admin/invoices', requireAdmin, (req, res) => {
+  const limit = adminLimit(req.query.limit);
+  const offset = Math.max(0, Math.floor(Number(req.query.offset) || 0));
+  const status = String(req.query.status || '').trim();
+  const companyCode = String(req.query.companyCode || '').trim().toUpperCase();
+  const q = String(req.query.q || '').trim().toLowerCase();
+
+  let rows = adminInvoiceRows();
+  if (status) rows = rows.filter((inv) => inv.status === status);
+  if (companyCode) rows = rows.filter((inv) => (inv.companyCode || '').toUpperCase() === companyCode);
+  if (q) {
+    rows = rows.filter((inv) => [
+      inv.id,
+      inv.address,
+      inv.sender,
+      inv.paidTxHash,
+      inv.forwardedTxHash,
+      inv.refundedTxHash,
+      inv.companyCode,
+    ].filter(Boolean).some((value) => String(value).toLowerCase().includes(q)));
+  }
+
+  res.json({
+    total: rows.length,
+    limit,
+    offset,
+    invoices: rows.slice(offset, offset + limit).map(publicInvoice),
+  });
+});
+
+app.get('/api/admin/webhooks', requireAdmin, (req, res) => {
+  res.json({
+    total: countWebhookDeliveries(),
+    deliveries: listAllWebhookDeliveries(adminLimit(req.query.limit)),
+  });
+});
+
+app.get('/api/admin/smtp', requireAdmin, (req, res) => {
+  res.json({ smtp: getSmtpConfigPublic() });
+});
+
+app.put('/api/admin/smtp', requireAdmin, adminActionLimiter, (req, res) => {
+  try {
+    res.json({ smtp: saveSmtpConfig(req.body || {}) });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post('/api/admin/smtp/test', requireAdmin, adminActionLimiter, async (req, res) => {
+  try {
+    res.json(await sendTestEmail(req.body?.to));
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// Validate or generate the admin key before accepting traffic.
+getAdminKey();
+
 app.listen(config.port, () => {
   getDb();
   rotateKnownDefaultPassword();
@@ -509,6 +675,7 @@ app.listen(config.port, () => {
   console.log(`main account: ${mainAddress()}`);
   console.log(`confirmations required: ${config.confirmations}`);
   console.log(`rpc: ${config.rpcUrl}`);
+  console.log(`admin console: /admin (key source: ${adminKeySource()})`);
 
   // Resume any invoices left in a pending state from a previous run.
   const pending = listInvoices().filter((i) => i.status === 'pending');

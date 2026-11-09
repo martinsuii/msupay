@@ -88,6 +88,30 @@ export function findById(id) {
   return rowToAccount(row);
 }
 
+// Admin-safe listing: deliberately never decrypts or selects private keys,
+// password hashes, session tokens, or webhook signing secrets.
+export function listAccountsForAdmin() {
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT id, email, company_code, company_name, company_description,
+           wallet_address, btc_address, ltc_address, webhook_url, created_at
+    FROM accounts
+    ORDER BY created_at DESC
+  `).all();
+  return rows.map((row) => ({
+    id: row.id,
+    email: row.email,
+    companyCode: row.company_code,
+    companyName: row.company_name || '',
+    companyDescription: row.company_description || '',
+    walletAddress: row.wallet_address || null,
+    btcAddress: row.btc_address || null,
+    ltcAddress: row.ltc_address || null,
+    webhookUrl: row.webhook_url || null,
+    createdAt: row.created_at,
+  }));
+}
+
 export function createAccount({ email, password }) {
   const db = getDb();
   const eth = generateCoinKey('ETH');

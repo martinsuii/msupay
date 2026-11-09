@@ -27,6 +27,8 @@ Environment values relevant to integrators:
 | Variable | Purpose |
 | --- | --- |
 | `PORT` | MSU Pay HTTP port |
+| `PUBLIC_BASE_URL` | Public origin used in links inside merchant payment emails |
+| `ADMIN_SECRET_KEY` | Long key for `/admin` (min 32 chars); auto-generated at `data/admin.key` if unset |
 | `SIGN_API_KEY` | Server-to-server key for `/api/sign`; auto-generated at `data/sign.key` if unset |
 | `MSUPAY_SIGN_KEY` | Café-side copy of the signing key |
 | `TOKEN_TTL_DAYS` | Merchant Bearer token lifetime |
