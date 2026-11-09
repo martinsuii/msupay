@@ -13,7 +13,7 @@ const nameInput = $('#nameInput');
 const payBtn = $('#payBtn');
 const closeBtn = $('#closeBtn');
 
-let nesppayUrl = 'http://localhost:3000';
+let msupayUrl = 'http://localhost:3000';
 let companyCode = 'NESPCFE';
 let currentItem = null;
 let ethEurRate = null;
@@ -97,14 +97,14 @@ async function pay() {
   const returns = strToB64url(`${origin}/success.html?${q}`);
   const returnf = strToB64url(`${origin}/cancelled.html`);
 
-  window.location.href = `${nesppayUrl}/pay?payinfo=${payinfo}&returns=${returns}&returnf=${returnf}`;
+  window.location.href = `${msupayUrl}/pay?payinfo=${payinfo}&returns=${returns}&returnf=${returnf}`;
 }
 
 async function loadConfig() {
   try {
     const res = await fetch('/api/config');
     const cfg = await res.json();
-    if (cfg.nesppayUrl) nesppayUrl = cfg.nesppayUrl;
+    if (cfg.msupayUrl) msupayUrl = cfg.msupayUrl;
     if (cfg.companyCode) companyCode = cfg.companyCode;
   } catch {
     /* keep default */

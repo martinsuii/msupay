@@ -36,7 +36,7 @@ async function generate() {
   if (customerName) body.customerName = customerName;
   if (customerInfo) body.customerInfo = customerInfo;
 
-  const token = localStorage.getItem('nesppay_token');
+  const token = localStorage.getItem('msupay_token');
   if (!token) {
     $('#url').textContent = '…';
     hint.textContent = 'Log in to your merchant dashboard to sign payment links.';

@@ -1,6 +1,6 @@
-# NespPay
+# MSU Pay
 
-NespPay is a self-hosted cryptocurrency payment processor. It creates a fresh
+MSU Pay is a self-hosted cryptocurrency payment processor. It creates a fresh
 deposit address for every invoice, watches it on-chain, waits for
 confirmations, and lets the payer or merchant settle the funds to the merchant
 wallet or refund them to the sender. Payments are priced in EUR and converted
@@ -67,7 +67,7 @@ receipts, QR codes, and a small demo storefront (the "café").
 ## How it works
 
 ```
-Merchant                         NespPay                          Payer
+Merchant                         MSU Pay                          Payer
    |                               |                                |
    |-- POST /api/sign ------------>|                                |
    |<-- payinfo (signed EUR) ------|                                |
@@ -83,15 +83,15 @@ Merchant                         NespPay                          Payer
 
 1. The merchant signs a EUR amount for its company code and shares the
    resulting payment link.
-2. The payer opens `/pay`, picks a coin, and creates an invoice. NespPay
+2. The payer opens `/pay`, picks a coin, and creates an invoice. MSU Pay
    converts the signed EUR amount using live rates, generates a new address,
    and returns an invoice capability token (`accessToken`).
-3. NespPay watches the address, reports `detected`/`confirming` over SSE and
+3. MSU Pay watches the address, reports `detected`/`confirming` over SSE and
    webhooks, and stops at `paid` (or `underpaid`).
 4. The payer chooses **Pay** to sweep the deposit to the merchant wallet, or
    **Cancel** to refund the sender. The merchant can perform the same actions
    with its bearer token.
-5. The merchant can later withdraw ETH from its NespPay wallet to an external
+5. The merchant can later withdraw ETH from its MSU Pay wallet to an external
    address, or export the wallet keys.
 
 ---
@@ -131,7 +131,7 @@ npm start
 - Health check: `curl http://localhost:3000/api/status` → `{"ok":true}`.
 - Interactive docs: `/docs`; payment-link tester: `/paytester`.
 
-The database `data/nesppay.db` is created on first start. Unless configured
+The database `data/msupay.db` is created on first start. Unless configured
 through the environment, the secrets `data/master.key`, `data/payinfo-secret`,
 and `data/sign.key` are generated automatically on first use. **Back these
 up.** Losing `master.key` makes the encrypted wallet keys unrecoverable.
@@ -164,9 +164,9 @@ See [`.env.example`](.env.example) for the annotated template.
 | `ALLOW_PRIVATE_WEBHOOKS` | off | **Development only.** Allows webhook targets on localhost/private networks. |
 | `TRUST_PROXY` | off | Set when behind a reverse proxy so rate limiting sees real client IPs (hop count, subnet, or CIDR). |
 | `CAFE_PORT` | `3001` | Port for the demo café storefront. |
-| `NESPPAY_URL` | `http://localhost:3000` | NespPay URL used by the café. |
+| `MSUPAY_URL` | `http://localhost:3000` | MSU Pay URL used by the café. |
 | `CAFE_COMPANY_CODE` | `NESPCFE` | Merchant company code used by the café. |
-| `NESPPAY_SIGN_KEY` | `SIGN_API_KEY` / `data/sign.key` | Café-side signing key. |
+| `MSUPAY_SIGN_KEY` | `SIGN_API_KEY` / `data/sign.key` | Café-side signing key. |
 | `SEED_DEMO_ACCOUNT` | off | Set to `1` to create the demo merchant `NESPCFE`; requires the two variables below. |
 | `SEED_DEMO_EMAIL` | — | Demo merchant email. |
 | `SEED_DEMO_PASSWORD` | — | Demo merchant password (12+ characters). |
@@ -352,17 +352,17 @@ a `5xx` money action; refresh the invoice first.
 
 ## Webhooks
 
-Configure a URL in the dashboard or with `PUT /api/webhook/config`. NespPay
+Configure a URL in the dashboard or with `PUT /api/webhook/config`. MSU Pay
 POSTs JSON to it for every event on an invoice that belongs to the merchant.
 
 ### Headers
 
 | Header | Value |
 | --- | --- |
-| `X-NespPay-Signature` | `sha256=<hex HMAC-SHA256 of the raw body>` |
-| `X-NespPay-Event` | e.g. `invoice.paid` |
-| `X-NespPay-Delivery-ID` | UUID of this delivery |
-| `User-Agent` | `NespPay-Webhook/1.0` |
+| `X-MSUPay-Signature` | `sha256=<hex HMAC-SHA256 of the raw body>` |
+| `X-MSUPay-Event` | e.g. `invoice.paid` |
+| `X-MSUPay-Delivery-ID` | UUID of this delivery |
+| `User-Agent` | `MSUPay-Webhook/1.0` |
 
 ### Payload
 
@@ -402,13 +402,13 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 const app = express();
 
 app.post(
-  '/webhooks/nesppay',
+  '/webhooks/msupay',
   express.raw({ type: 'application/json' }),
   (req, res) => {
-    const provided = req.get('X-NespPay-Signature') || '';
+    const provided = req.get('X-MSUPay-Signature') || '';
     const expected =
       'sha256=' +
-      createHmac('sha256', process.env.NESPPAY_WEBHOOK_SECRET)
+      createHmac('sha256', process.env.MSUPAY_WEBHOOK_SECRET)
         .update(req.body)
         .digest('hex');
 
@@ -492,7 +492,7 @@ coin's base unit (wei for ETH, satoshi for BTC, litoshi for LTC).
 
 Operational rules:
 
-- Serve NespPay over **HTTPS** and set `TRUST_PROXY` when behind a proxy.
+- Serve MSU Pay over **HTTPS** and set `TRUST_PROXY` when behind a proxy.
 - `GET /api/wallet/credentials` returns plaintext private keys; it requires a
   bearer token but no password re-entry. Protect the dashboard and tokens
   accordingly.
@@ -544,7 +544,7 @@ Operational rules:
 
 ```bash
 npm run build     # minify public JS/CSS into *.min.*
-npm start         # build, then start NespPay on :3000
+npm start         # build, then start MSU Pay on :3000
 npm run cafe      # build, then start the demo café on :3001
 npm run invoice   # CLI: create and watch an ETH invoice
 npm run watch     # CLI: re-attach to the most recent pending invoice
@@ -570,11 +570,11 @@ and webhook deliveries. Do not run them against a production database.
 ## Demo café
 
 `npm run cafe` starts a small storefront at <http://localhost:3001> that prices
-items in EUR and creates NespPay payment links through its own `/api/sign`
+items in EUR and creates MSU Pay payment links through its own `/api/sign`
 proxy, so the signing key never reaches the browser.
 
 Register a merchant, then set `CAFE_COMPANY_CODE` to its company code and
-`NESPPAY_URL` to your NespPay origin. Alternatively, enable the seeded demo
+`MSUPAY_URL` to your MSU Pay origin. Alternatively, enable the seeded demo
 merchant with `SEED_DEMO_ACCOUNT=1`, `SEED_DEMO_EMAIL`, and
 `SEED_DEMO_PASSWORD`; it is created with company code `NESPCFE`. There are no
 built-in demo credentials.

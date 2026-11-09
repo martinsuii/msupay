@@ -1,6 +1,6 @@
 const $ = (sel) => document.querySelector(sel);
 
-const token = localStorage.getItem('nesppay_token');
+const token = localStorage.getItem('msupay_token');
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (c) => ({
@@ -431,7 +431,7 @@ $('#logoutBtn').addEventListener('click', async () => {
   } catch {
     /* clear locally even if the server is unreachable */
   }
-  localStorage.removeItem('nesppay_token');
+  localStorage.removeItem('msupay_token');
   window.location.href = '/';
 });
 
@@ -453,7 +453,7 @@ $('#deleteConfirmBtn').addEventListener('click', async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) {
-      localStorage.removeItem('nesppay_token');
+      localStorage.removeItem('msupay_token');
       window.location.href = '/';
       return;
     }

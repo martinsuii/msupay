@@ -138,10 +138,10 @@ async function executeDelivery({ deliveryId, url, secret, event, payloadStr, att
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-NespPay-Signature': `sha256=${signature}`,
-        'X-NespPay-Event': event,
-        'X-NespPay-Delivery-ID': deliveryId,
-        'User-Agent': 'NespPay-Webhook/1.0',
+        'X-MSUPay-Signature': `sha256=${signature}`,
+        'X-MSUPay-Event': event,
+        'X-MSUPay-Delivery-ID': deliveryId,
+        'User-Agent': 'MSUPay-Webhook/1.0',
       },
       body: payloadStr,
       redirect: 'manual',
@@ -285,7 +285,7 @@ export async function sendTestWebhook(companyCode) {
     createdAt: now,
     companyCode: account.companyCode,
     data: {
-      message: 'This is a test webhook from NespPay.',
+      message: 'This is a test webhook from MSU Pay.',
       merchant: {
         companyCode: account.companyCode,
         companyName: account.companyName,

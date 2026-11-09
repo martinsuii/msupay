@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Docs — NespPay</title>
+  <title>Docs — MSU Pay</title>
   <link rel="stylesheet" href="docs.css" />
 </head>
 <body>
@@ -11,7 +11,7 @@
     <div class="nav-inner">
       <a class="brand" href="/">
         <span class="brand-dot"></span>
-        <span class="brand-name">Nesp<span class="brand-accent">Pay</span></span>
+        <span class="brand-name">MSU<span class="brand-accent"> Pay</span></span>
       </a>
       <div class="nav-actions">
         <a class="nav-link" href="/">Home</a>
@@ -41,7 +41,7 @@
     </aside>
 
     <article class="content">
-      <h1 class="page-title">NespPay Documentation</h1>
+      <h1 class="page-title">MSU Pay Documentation</h1>
       <p class="lede">Accept ETH, BTC, and LTC payments with signed payment links, webhooks, and a hosted payment page.</p>
 
       <section id="overview">
@@ -83,7 +83,7 @@ POST /api/invoice/&lt;id&gt;/cancel
 
       <section id="webhooks">
         <h2>Webhooks</h2>
-        <p>Configure a webhook URL in the dashboard. Each POST includes an <code>X-NespPay-Signature</code> header. Verify it before trusting the payload:</p>
+        <p>Configure a webhook URL in the dashboard. Each POST includes an <code>X-MSUPay-Signature</code> header. Verify it before trusting the payload:</p>
         <pre><code>const expected = 'sha256=' + crypto
   .createHmac('sha256', WEBHOOK_SECRET)
   .update(rawBody)

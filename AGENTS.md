@@ -1,12 +1,12 @@
-# AGENTS.md — Integrating NespPay
+# AGENTS.md — Integrating MSU Pay
 
-This file is for developers and coding agents integrating a project with the NespPay payment processor. It covers the supported integration contract, not the internal implementation.
+This file is for developers and coding agents integrating a project with the MSU Pay payment processor. It covers the supported integration contract, not the internal implementation.
 
 ## Rules
 
 - Never hardcode merchant tokens, private keys, webhook secrets, or the signing key in source, fixtures, or client-side code.
 - Keep all signing requests server-side. The browser must never receive the merchant Bearer token or the `x-sign-key`.
-- Always verify the `X-NespPay-Signature` header against the raw request body before trusting a webhook.
+- Always verify the `X-MSUPay-Signature` header against the raw request body before trusting a webhook.
 - Treat `accessToken` from invoice creation as a payer capability. Send it only as `X-Invoice-Token` to that invoice's `pay`/`cancel` endpoints.
 - Do not infer a merchant's code. Fetch it from the account or configuration.
 - Handle `401`, `403`, `404`, `409`, `429`, and `5xx` explicitly. Do not retry non-idempotent money actions blindly.
@@ -26,9 +26,9 @@ Environment values relevant to integrators:
 
 | Variable | Purpose |
 | --- | --- |
-| `PORT` | NespPay HTTP port |
+| `PORT` | MSU Pay HTTP port |
 | `SIGN_API_KEY` | Server-to-server key for `/api/sign`; auto-generated at `data/sign.key` if unset |
-| `NESPPAY_SIGN_KEY` | Café-side copy of the signing key |
+| `MSUPAY_SIGN_KEY` | Café-side copy of the signing key |
 | `TOKEN_TTL_DAYS` | Merchant Bearer token lifetime |
 | `INVOICE_TTL_MINUTES` | Pending invoice lifetime |
 | `ALLOW_PRIVATE_WEBHOOKS` | Development only; allows localhost/private webhook targets |
@@ -78,9 +78,9 @@ A merchant Bearer token also authorizes its own invoices. Never expose an invoic
 
 Configure the URL in the dashboard. Every delivery is a JSON POST with:
 
-- `X-NespPay-Signature: sha256=<hex>`
-- `X-NespPay-Event`
-- `X-NespPay-Delivery-ID`
+- `X-MSUPay-Signature: sha256=<hex>`
+- `X-MSUPay-Event`
+- `X-MSUPay-Delivery-ID`
 
 Verify HMAC-SHA256 over the **raw** body using the merchant webhook secret, with a constant-time comparison. Return 2xx to acknowledge; non-2xx responses are retried with backoff.
 

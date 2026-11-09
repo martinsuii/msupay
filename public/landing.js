@@ -20,7 +20,7 @@ document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 
 // Show logged-in state in the nav if a token exists.
 async function initAuthNav() {
-  const token = localStorage.getItem('nesppay_token');
+  const token = localStorage.getItem('msupay_token');
   if (!token) return;
   try {
     const res = await fetch('/api/account', {
@@ -32,7 +32,7 @@ async function initAuthNav() {
       document.getElementById('loggedIn').classList.remove('hidden');
       document.getElementById('userBadge').textContent = account.companyName || account.email;
     } else if (res.status === 401) {
-      localStorage.removeItem('nesppay_token');
+      localStorage.removeItem('msupay_token');
     }
   } catch {
     /* offline — leave nav as-is */

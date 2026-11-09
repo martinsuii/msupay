@@ -1,5 +1,5 @@
 {
-  "name": "nesppay",
+  "name": "msupay",
   "version": "0.1.0",
   "type": "module",
   "description": "Crypto payment processor: per-invoice addresses, payment confirmation, merchant settlement, webhooks",

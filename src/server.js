@@ -472,7 +472,7 @@ app.get('/api/invoice/:id/receipt', invoiceLimiter, async (req, res) => {
   try {
     const pdf = await buildReceipt(inv, { mainAddress: mainAddress() });
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="nesppay-receipt-${inv.id.slice(0, 8)}.pdf"`);
+    res.setHeader('Content-Disposition', `attachment; filename="msupay-receipt-${inv.id.slice(0, 8)}.pdf"`);
     res.send(pdf);
   } catch (e) {
     return internalError(res, e, 'receipt');

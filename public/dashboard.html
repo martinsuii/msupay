@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard — NespPay</title>
+  <title>Dashboard — MSU Pay</title>
   <link rel="stylesheet" href="dashboard.css" />
 </head>
 <body>
@@ -11,7 +11,7 @@
     <div class="topbar-inner">
       <a class="brand" href="/">
         <span class="brand-dot"></span>
-        <span class="brand-name">Nesp<span class="brand-accent">Pay</span></span>
+        <span class="brand-name">MSU<span class="brand-accent"> Pay</span></span>
       </a>
       <div class="topbar-actions">
         <a class="topbar-link" href="/">Home</a>
@@ -110,7 +110,7 @@
         <div class="field">
           <label for="webhookUrl">Webhook Endpoint URL</label>
           <div class="input-action-row">
-            <input id="webhookUrl" type="url" placeholder="https://api.yourdomain.com/webhooks/nesppay" />
+            <input id="webhookUrl" type="url" placeholder="https://api.yourdomain.com/webhooks/msupay" />
             <button id="saveWebhookBtn" class="btn">Save URL</button>
           </div>
           <p class="field-hint" id="webhookSaveMsg" style="display:none; color:#10b981; margin-top:6px; font-size:0.85rem;">Saved successfully ✓</p>
@@ -124,7 +124,7 @@
             <button id="regenWebhookSecretBtn" class="mini-copy" style="background:transparent; border:1px solid var(--border);">Regenerate</button>
           </div>
         </div>
-        <p class="field-hint">NespPay signs all payloads with HMAC-SHA256 in the <code>X-NespPay-Signature</code> header.</p>
+        <p class="field-hint">MSU Pay signs all payloads with HMAC-SHA256 in the <code>X-MSUPay-Signature</code> header.</p>
 
         <div class="webhook-actions-row">
           <button id="testWebhookBtn" class="btn btn-ghost">Send test ping</button>

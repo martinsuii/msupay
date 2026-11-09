@@ -28,7 +28,7 @@ export function buildReceipt(invoice, { mainAddress }) {
 
     // Header
     doc.circle(40, 48, 7).fill(BLUE);
-    doc.font('Helvetica-Bold').fontSize(16).fillColor(INK).text('NespPay', 54, 38);
+    doc.font('Helvetica-Bold').fontSize(16).fillColor(INK).text('MSU Pay', 54, 38);
     doc.font('Helvetica').fontSize(9).fillColor(MUTED).text('Payment receipt', 54, 55);
 
     doc.moveDown(2);
@@ -69,7 +69,7 @@ export function buildReceipt(invoice, { mainAddress }) {
 
     doc.moveDown(1);
     doc.font('Helvetica').fontSize(8).fillColor(MUTED)
-      .text(`This receipt was generated automatically by NespPay on ${networkLabel}.`, 40, y, { width: 340, align: 'center' });
+      .text(`This receipt was generated automatically by MSU Pay on ${networkLabel}.`, 40, y, { width: 340, align: 'center' });
 
     doc.end();
   });

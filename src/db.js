@@ -8,7 +8,7 @@ import { config } from './config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '..', 'data');
-const DB_PATH = join(DATA_DIR, 'nesppay.db');
+const DB_PATH = join(DATA_DIR, 'msupay.db');
 
 mkdirSync(DATA_DIR, { recursive: true });
 

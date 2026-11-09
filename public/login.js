@@ -22,7 +22,7 @@ $('#loginBtn').addEventListener('click', async () => {
       error.classList.add('show');
       return;
     }
-    localStorage.setItem('nesppay_token', data.token);
+    localStorage.setItem('msupay_token', data.token);
     window.location.href = '/dashboard';
   } catch {
     error.textContent = 'Connection error. Please try again later.';

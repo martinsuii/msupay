@@ -52,7 +52,7 @@ $('#nextBtn').addEventListener('click', async () => {
       showError(error1, data.error || 'Registration failed.');
       return;
     }
-    localStorage.setItem('nesppay_token', data.token);
+    localStorage.setItem('msupay_token', data.token);
     goStep2();
   } catch {
     showError(error1, 'Connection error. Please try again later.');
@@ -77,7 +77,7 @@ $('#finishBtn').addEventListener('click', async () => {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('nesppay_token')}`,
+        Authorization: `Bearer ${localStorage.getItem('msupay_token')}`,
       },
       body: JSON.stringify({
         companyName,
